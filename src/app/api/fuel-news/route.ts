@@ -29,7 +29,7 @@ export async function GET() {
       if (title && link) items.push({ title, link, pubDate });
     }
     return NextResponse.json({ items });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ items: [] });
   }
 }

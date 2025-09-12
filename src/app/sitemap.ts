@@ -14,7 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Add city price pages
   try {
-    const { listCities } = require("@/lib/fuelPrices");
+    const { listCities } = await import("@/lib/fuelPrices");
     const cities = listCities();
     for (const c of cities) {
       const slug = c.city.toLowerCase();
