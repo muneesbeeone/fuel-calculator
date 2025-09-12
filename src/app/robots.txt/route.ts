@@ -4,7 +4,7 @@ export function GET() {
   const body = [
     "User-agent: *",
     "Allow: /",
-    "Sitemap: https://example.com/sitemap.xml",
+    "Sitemap: https://fuelcalculator.munees.co.in/sitemap.xml",
   ].join("\n");
   return new NextResponse(body, {
     headers: { "Content-Type": "text/plain" },

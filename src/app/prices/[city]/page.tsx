@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { listCities, findCityPrice } from "@/lib/fuelPrices";
+import Link from "next/link";
 
 export async function generateStaticParams() {
   return listCities().map((c) => ({ city: c.city.toLowerCase() }));
@@ -29,7 +30,7 @@ export default function CityPricesPage({ params }: { params: { city: string } })
       </div>
       <p className="mt-4 text-xs opacity-70">Updated: {info.updatedAt}. Prices are indicative.</p>
       <p className="mt-6 text-sm">Use the calculator on the home page to estimate your trip cost with these prices.</p>
-      <p className="mt-4 text-sm"><a className="underline" href="/">Go to calculator</a></p>
+      <p className="mt-4 text-sm"><Link className="underline" href="/">Go to calculator</Link></p>
     </div>
   );
 }
