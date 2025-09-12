@@ -79,9 +79,23 @@ export default function Home() {
       setStationsLoading(true);
       const coords = await getBrowserLocation();
       const params = new URLSearchParams({ lat: String(coords.latitude), lon: String(coords.longitude), radius: String(3000) });
-      const res = await fetch(`/api/nearby-stations?${params}`);
-      if (!res.ok) throw new Error("Failed stations");
-      const data = await res.json();
+      // Try server route first
+      let data: any = null;
+      try {
+        const res = await fetch(`/api/nearby-stations?${params}`);
+        if (res.ok) data = await res.json();
+      } catch {}
+      if (!data) {
+        // Static fallback: query Overpass directly
+        const query = `node["amenity"="fuel"](around:3000,${coords.latitude},${coords.longitude});out tags center;`;
+        const res2 = await fetch("https://overpass-api.de/api/interpreter", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+          body: new URLSearchParams({ data: query }).toString(),
+        });
+        const json = await res2.json();
+        data = { items: (json.elements || []).map((el: any) => ({ id: el.id, name: el.tags?.name || "Fuel Station", brand: el.tags?.brand, operator: el.tags?.operator, lat: el.lat ?? el.center?.lat, lon: el.lon ?? el.center?.lon })) };
+      }
       setStations(Array.isArray(data.items) ? data.items : []);
     } catch {
       setStations([]);

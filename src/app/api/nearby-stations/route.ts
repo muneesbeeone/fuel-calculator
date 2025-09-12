@@ -44,7 +44,8 @@ export async function GET(req: NextRequest) {
     }));
     return NextResponse.json({ items });
   } catch (e) {
-    return NextResponse.json({ error: "Failed to fetch stations" }, { status: 500 });
+    // For static export environments without server runtime, suggest client fallback
+    return NextResponse.json({ items: [] });
   }
 }
 
