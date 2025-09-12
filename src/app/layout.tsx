@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
+import Link from "next/link";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -110,13 +111,13 @@ export default function RootLayout({
           <div className="mx-auto max-w-3xl px-4 py-6 flex flex-wrap items-center justify-between gap-3">
             <p className="opacity-70">© {new Date().getFullYear()} Fuel Calculator India</p>
             <nav className="flex gap-4 flex-wrap">
-              <a className="hover:underline" href="/">Home</a>
-              <a className="hover:underline" href="/guides">Guides</a>
-              <a className="hover:underline" href="/prices/delhi">Prices</a>
-              <a className="hover:underline" href="/privacy">Privacy</a>
-              <a className="hover:underline" href="/terms">Terms</a>
-              <a className="hover:underline" href="/sitemap.xml">Sitemap</a>
-              <a className="hover:underline" href="/api/fuel-news" target="_blank">News API</a>
+              <Link className="hover:underline" href="/">Home</Link>
+              <Link className="hover:underline" href="/guides">Guides</Link>
+              <Link className="hover:underline" href="/prices/delhi">Prices</Link>
+              <Link className="hover:underline" href="/privacy">Privacy</Link>
+              <Link className="hover:underline" href="/terms">Terms</Link>
+              <Link className="hover:underline" href="/sitemap.xml">Sitemap</Link>
+              <a className="hover:underline" href="/api/fuel-news" target="_blank" rel="noreferrer">News API</a>
             </nav>
           </div>
         </footer>
