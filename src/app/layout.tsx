@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true, maxImagePreview: "large", maxSnippet: -1, maxVideoPreview: -1 },
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } as any,
   },
   authors: [{ name: "Fuel Calculator India" }],
   creator: "Fuel Calculator India",

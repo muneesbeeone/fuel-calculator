@@ -13,8 +13,8 @@ export default function E20Guide() {
       </p>
       <h2 className="mt-6 text-lg font-medium">Compatibility</h2>
       <ul className="mt-2 list-disc pl-5 text-sm leading-7">
-        <li>Newer vehicles (2023+) are often E20‑ready. Look for an E20 sticker on the fuel lid/manual.</li>
-        <li>Non‑compliant engines should use regular petrol to avoid potential component wear.</li>
+        <li>Newer vehicles (2023+) are often E20-ready. Look for an E20 sticker on the fuel lid/manual.</li>
+        <li>Non-compliant engines should use regular petrol to avoid potential component wear.</li>
       </ul>
       <h2 className="mt-6 text-lg font-medium">Pros and cons</h2>
       <ul className="mt-2 list-disc pl-5 text-sm leading-7">
