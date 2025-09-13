@@ -78,24 +78,15 @@ export default function Home() {
     try {
       setStationsLoading(true);
       const coords = await getBrowserLocation();
-      const params = new URLSearchParams({ lat: String(coords.latitude), lon: String(coords.longitude), radius: String(3000) });
-      // Try server route first
-      let data: { items: Array<{ id: number; name: string; brand?: string; operator?: string; lat?: number; lon?: number }> } | null = null;
-      try {
-        const res = await fetch(`/api/nearby-stations?${params}`);
-        if (res.ok) data = await res.json();
-      } catch {}
-      if (!data) {
-        // Static fallback: query Overpass directly
-        const query = `node["amenity"="fuel"](around:3000,${coords.latitude},${coords.longitude});out tags center;`;
-        const res2 = await fetch("https://overpass-api.de/api/interpreter", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
-          body: new URLSearchParams({ data: query }).toString(),
-        });
-        const json = await res2.json();
-        data = { items: (json.elements || []).map((el: { id: number; tags?: Record<string, string>; lat?: number; lon?: number; center?: { lat: number; lon: number } }) => ({ id: el.id, name: el.tags?.name || "Fuel Station", brand: el.tags?.brand, operator: el.tags?.operator, lat: el.lat ?? el.center?.lat, lon: el.lon ?? el.center?.lon })) };
-      }
+      // Query Overpass directly for nearby stations
+      const query = `node["amenity"="fuel"](around:3000,${coords.latitude},${coords.longitude});out tags center;`;
+      const res = await fetch("https://overpass-api.de/api/interpreter", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+        body: new URLSearchParams({ data: query }).toString(),
+      });
+      const json = await res.json();
+      const data = { items: (json.elements || []).map((el: { id: number; tags?: Record<string, string>; lat?: number; lon?: number; center?: { lat: number; lon: number } }) => ({ id: el.id, name: el.tags?.name || "Fuel Station", brand: el.tags?.brand, operator: el.tags?.operator, lat: el.lat ?? el.center?.lat, lon: el.lon ?? el.center?.lon })) };
       setStations(Array.isArray(data.items) ? data.items : []);
     } catch {
       setStations([]);
@@ -176,9 +167,29 @@ export default function Home() {
     let ignore = false;
     async function loadNews() {
       try {
-        const res = await fetch("/api/fuel-news", { cache: "no-store" });
-        const data = await res.json();
-        if (!ignore) setNews(data.items || []);
+        // Query Google News RSS directly
+        const q = encodeURIComponent("India petrol diesel CNG fuel price OR oil marketing companies");
+        const url = `https://news.google.com/rss/search?q=${q}&hl=en-IN&gl=IN&ceid=IN:en`;
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) return;
+        const xml = await res.text();
+        // Very light RSS parse without extra deps
+        const itemRegex = /<item>[\s\S]*?<\/item>/g;
+        const titleRegex = /<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/i;
+        const linkRegex = /<link>(.*?)<\/link>/i;
+        const dateRegex = /<pubDate>(.*?)<\/pubDate>/i;
+        const items: Array<{ title: string; link: string; pubDate?: string }> = [];
+        const matches = xml.match(itemRegex) || [];
+        for (const itm of matches.slice(0, 10)) {
+          const tMatch = itm.match(titleRegex);
+          const lMatch = itm.match(linkRegex);
+          const dMatch = itm.match(dateRegex);
+          const title = (tMatch?.[1] || tMatch?.[2] || "").replace(/\s+/g, " ").trim();
+          const link = (lMatch?.[1] || "").trim();
+          const pubDate = dMatch?.[1];
+          if (title && link) items.push({ title, link, pubDate });
+        }
+        if (!ignore) setNews(items);
       } catch {}
     }
     loadNews();
