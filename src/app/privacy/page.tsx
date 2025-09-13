@@ -8,7 +8,7 @@ export default function PrivacyPage() {
     <div className="mx-auto max-w-3xl px-4 sm:px-6 md:px-8 py-8">
       <h1 className="text-2xl font-semibold">Privacy Policy</h1>
       <p className="mt-3 text-sm leading-7 opacity-80">
-        We respect your privacy. This app uses the browser's geolocation API (with your permission) only to
+        We respect your privacy. This app uses the browser&apos;s geolocation API (with your permission) only to
         detect your approximate city and show relevant fuel information. Location data is not stored on our
         servers. We do not collect personally identifiable information.
       </p>

@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } as any,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
   },
   authors: [{ name: "Fuel Calculator India" }],
   creator: "Fuel Calculator India",
@@ -91,7 +91,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}
       >
         {/* Fuel icons sprite */}
-        <div dangerouslySetInnerHTML={{ __html: require("fs").readFileSync("public/fuel-icons.svg", "utf8") }} />
+        <div dangerouslySetInnerHTML={{ __html: `<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="icon-pump" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M4 3h9a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm2 3h5v3H6V6Zm0 5h5v7H6v-7Zm12-7a1 1 0 0 0-1 1v4a2 2 0 1 0 2 0V8h1v7a1 1 0 0 1-1 1h-1v2h1a3 3 0 0 0 3-3V7a2 2 0 0 0-2-2h-2Z"/>
+  </symbol>
+  <symbol id="icon-leaf" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75S7 14 17 14s11.25.25 11.25.25-.5-1.25-.5-3.25S17 8 17 8Z"/>
+  </symbol>
+</svg>` }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",

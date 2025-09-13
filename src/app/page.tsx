@@ -40,7 +40,7 @@ export default function Home() {
   const [distanceKm, setDistanceKm] = useState<number>(100);
   const [mileage, setMileage] = useState<number>(15);
   const [roundTrip, setRoundTrip] = useState<boolean>(false);
-  const [stations, setStations] = useState<Array<{ id: number; name: string; brand?: string; operator?: string; lat: number; lon: number }>>([]);
+  const [stations, setStations] = useState<Array<{ id: number; name: string; brand?: string; operator?: string; lat?: number; lon?: number }>>([]);
   const [stationsLoading, setStationsLoading] = useState(false);
   const [news, setNews] = useState<Array<{ title: string; link: string; pubDate?: string }>>([]);
 
@@ -62,7 +62,7 @@ export default function Home() {
           state: info.state,
           country: info.country,
         });
-      } catch (e) {
+      } catch {
         if (!isMounted) return;
         setUi({ locationLabel: "Could not detect location" });
       }
@@ -80,7 +80,7 @@ export default function Home() {
       const coords = await getBrowserLocation();
       const params = new URLSearchParams({ lat: String(coords.latitude), lon: String(coords.longitude), radius: String(3000) });
       // Try server route first
-      let data: any = null;
+      let data: { items: Array<{ id: number; name: string; brand?: string; operator?: string; lat?: number; lon?: number }> } | null = null;
       try {
         const res = await fetch(`/api/nearby-stations?${params}`);
         if (res.ok) data = await res.json();
@@ -94,7 +94,7 @@ export default function Home() {
           body: new URLSearchParams({ data: query }).toString(),
         });
         const json = await res2.json();
-        data = { items: (json.elements || []).map((el: any) => ({ id: el.id, name: el.tags?.name || "Fuel Station", brand: el.tags?.brand, operator: el.tags?.operator, lat: el.lat ?? el.center?.lat, lon: el.lon ?? el.center?.lon })) };
+        data = { items: (json.elements || []).map((el: { id: number; tags?: Record<string, string>; lat?: number; lon?: number; center?: { lat: number; lon: number } }) => ({ id: el.id, name: el.tags?.name || "Fuel Station", brand: el.tags?.brand, operator: el.tags?.operator, lat: el.lat ?? el.center?.lat, lon: el.lon ?? el.center?.lon })) };
       }
       setStations(Array.isArray(data.items) ? data.items : []);
     } catch {
@@ -169,7 +169,6 @@ export default function Home() {
       if (rt !== null) setRoundTrip(rt === "1");
       if (c) setUi((prev) => ({ ...prev, city: c || undefined, state: s || undefined }));
     } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load fuel-related news

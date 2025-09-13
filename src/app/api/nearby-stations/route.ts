@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 // Fetch nearby fuel stations using OpenStreetMap Overpass API
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -33,7 +35,7 @@ export async function GET(req: NextRequest) {
     }
     const data = await res.json();
     const elements = Array.isArray(data?.elements) ? data.elements : [];
-    const items = elements.map((el: any) => ({
+    const items = elements.map((el: { id: number; tags?: Record<string, string>; lat?: number; lon?: number; center?: { lat: number; lon: number } }) => ({
       id: el.id,
       name: el.tags?.name || "Fuel Station",
       brand: el.tags?.brand,
@@ -43,7 +45,7 @@ export async function GET(req: NextRequest) {
       tags: el.tags || {},
     }));
     return NextResponse.json({ items });
-  } catch (e) {
+  } catch {
     // For static export environments without server runtime, suggest client fallback
     return NextResponse.json({ items: [] });
   }

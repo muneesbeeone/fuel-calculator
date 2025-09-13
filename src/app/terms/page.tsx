@@ -19,7 +19,7 @@ export default function TermsPage() {
       </ul>
       <h2 className="mt-6 text-lg font-medium">No warranties</h2>
       <p className="mt-2 text-sm leading-7">
-        The service is provided on an "as is" and "as available" basis without warranties of any kind.
+        The service is provided on an &quot;as is&quot; and &quot;as available&quot; basis without warranties of any kind.
       </p>
       <h2 className="mt-6 text-lg font-medium">Limitation of liability</h2>
       <p className="mt-2 text-sm leading-7">

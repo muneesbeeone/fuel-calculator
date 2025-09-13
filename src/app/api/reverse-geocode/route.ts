@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const lat = searchParams.get("lat");
@@ -35,7 +37,7 @@ export async function GET(req: NextRequest) {
     const country: string | undefined = address.country;
     const displayName: string | undefined = data?.display_name;
     return NextResponse.json({ city, state, country, displayName });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "Reverse geocode failed" }, { status: 500 });
   }
 }

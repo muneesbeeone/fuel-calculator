@@ -9,7 +9,7 @@ export default function E20Guide() {
       <h1 className="text-2xl font-semibold">E20 fuel: what you need to know</h1>
       <p className="mt-3 text-sm leading-7 opacity-80">
         E20 is petrol blended with 20% ethanol. It reduces fossil fuel use and emissions, but older vehicles may
-        see slightly lower mileage. Always check your vehicle's E20 compatibility.
+        see slightly lower mileage. Always check your vehicle&apos;s E20 compatibility.
       </p>
       <h2 className="mt-6 text-lg font-medium">Compatibility</h2>
       <ul className="mt-2 list-disc pl-5 text-sm leading-7">

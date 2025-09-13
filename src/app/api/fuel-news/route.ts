@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 // Fetch fuel-related news using Google News RSS (public)
 export async function GET() {
   // Query terms focused on Indian fuel prices

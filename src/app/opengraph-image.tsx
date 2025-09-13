@@ -6,6 +6,7 @@ export const size = {
 };
 
 export const contentType = "image/png";
+export const dynamic = "force-static";
 
 export default async function fuelcalculator() {
   const title = "India Fuel Cost Calculator";

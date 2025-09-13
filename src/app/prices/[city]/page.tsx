@@ -6,15 +6,17 @@ export async function generateStaticParams() {
   return listCities().map((c) => ({ city: c.city.toLowerCase() }));
 }
 
-export async function generateMetadata({ params }: { params: { city: string } }) {
-  const cityName = params.city.replace(/-/g, " ");
+export async function generateMetadata({ params }: { params: Promise<{ city: string }> }) {
+  const { city } = await params;
+  const cityName = city.replace(/-/g, " ");
   const info = findCityPrice(cityName);
   const title = info ? `${info.city}${info.state ? ", " + info.state : ""} Fuel Prices` : `Fuel Prices`;
   return { title: `${title} | Fuel Calculator India`, description: `Current fuel prices and trip cost estimation for ${info?.city || cityName}.` };
 }
 
-export default function CityPricesPage({ params }: { params: { city: string } }) {
-  const cityName = params.city.replace(/-/g, " ");
+export default async function CityPricesPage({ params }: { params: Promise<{ city: string }> }) {
+  const { city } = await params;
+  const cityName = city.replace(/-/g, " ");
   const info = findCityPrice(cityName);
   if (!info) return notFound();
   return (
