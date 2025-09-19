@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, CSSProperties, JSX } from "react";
+import { useEffect, CSSProperties, ReactElement } from "react";
 
 interface AdSenseProps {
   slot: string;
@@ -12,7 +12,7 @@ interface AdSenseProps {
 
 declare global {
   interface Window {
-    adsbygoogle?: any[];
+    adsbygoogle?: Record<string, unknown>[];
   }
 }
 
@@ -23,7 +23,7 @@ const AdSense = ({
   responsive = true,
   className = "",
   adType = "banner",
-}: AdSenseProps): JSX.Element => {
+}: AdSenseProps): ReactElement => {
   useEffect(() => {
     try {
       if (typeof window !== "undefined") {
@@ -33,7 +33,7 @@ const AdSense = ({
     } catch (error) {
       console.error("AdSense error:", error);
     }
-  }, []);
+  }, [slot, format, responsive]);
 
   const adStyle: CSSProperties = {
     ...style,
