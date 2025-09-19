@@ -1,3 +1,5 @@
+import AdSense from "@/components/AdSense";
+
 export const metadata = {
   title: "Save Fuel: Practical Tips | Fuel Calculator India",
   description: "Actionable ways to improve mileage and cut fuel costs in India.",

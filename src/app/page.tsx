@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getBrowserLocation } from "@/lib/geolocation";
 import { reverseGeocode } from "@/lib/reverseGeocode";
 import { estimateTripCost, findCityPrice, listCities, type FuelType } from "@/lib/fuelPrices";
+import AdSense from "@/components/AdSense";
 
 function CountUp({ value, prefix = "", className = "" }: { value?: number; prefix?: string; className?: string }) {
   const [display, setDisplay] = useState(0);
@@ -121,14 +122,14 @@ export default function Home() {
         if (typeof s.mileage === "number") setMileage(s.mileage);
         if (typeof s.roundTrip === "boolean") setRoundTrip(s.roundTrip);
       }
-    } catch {}
+    } catch { }
   }, []);
 
   useEffect(() => {
     try {
       const payload = { fuelType, distanceKm, mileage, roundTrip };
       localStorage.setItem("fuel-calc-settings", JSON.stringify(payload));
-    } catch {}
+    } catch { }
   }, [fuelType, distanceKm, mileage, roundTrip]);
 
   // Sync state to URL for sharing
@@ -159,7 +160,7 @@ export default function Home() {
       if (isFinite(m)) setMileage(m);
       if (rt !== null) setRoundTrip(rt === "1");
       if (c) setUi((prev) => ({ ...prev, city: c || undefined, state: s || undefined }));
-    } catch {}
+    } catch { }
   }, []);
 
   // Load fuel-related news
@@ -190,7 +191,7 @@ export default function Home() {
           if (title && link) items.push({ title, link, pubDate });
         }
         if (!ignore) setNews(items);
-      } catch {}
+      } catch { }
     }
     loadNews();
     return () => {
@@ -207,7 +208,7 @@ export default function Home() {
           transition={{ duration: 0.35, ease: "easeOut" }}
           className="flex items-center gap-2 text-2xl sm:text-3xl md:text-4xl font-semibold"
         >
-          <svg aria-hidden className="h-7 w-7 text-[var(--color-primary)]"><use href="#icon-pump"/></svg>
+          <svg aria-hidden className="h-7 w-7 text-[var(--color-primary)]"><use href="#icon-pump" /></svg>
           India Fuel Cost Calculator
         </motion.h1>
         <p className="mt-2 text-sm opacity-80">{ui.locationLabel}</p>
@@ -280,7 +281,7 @@ export default function Home() {
 
           <motion.div className="rounded-xl border border-black/10 dark:border-white/15 p-4" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3, delay: 0.05 }}>
             <h2 className="flex items-center gap-2 text-lg font-medium">
-              <svg aria-hidden className="h-5 w-5 text-[var(--color-secondary)]"><use href="#icon-leaf"/></svg>
+              <svg aria-hidden className="h-5 w-5 text-[var(--color-secondary)]"><use href="#icon-leaf" /></svg>
               Estimated Cost
             </h2>
             {cityPrice ? (
@@ -300,7 +301,13 @@ export default function Home() {
             )}
           </motion.div>
         </div>
-
+        <div className="mt-6 flex justify-center">
+          <AdSense
+            slot="9783500294"
+            className="max-w-728px w-full"
+            adType="banner"
+          />
+        </div>
         {cityPrice && (
           <motion.div className="mt-8 rounded-xl border border-black/10 dark:border-white/15 p-4" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3, delay: 0.1 }}>
             <h2 className="text-lg font-medium">{cityPrice.city}{cityPrice.state ? `, ${cityPrice.state}` : ""} Fuel Prices</h2>
@@ -326,12 +333,12 @@ export default function Home() {
                     await navigator.clipboard.writeText(location.href);
                     setCopied(true);
                     setTimeout(() => setCopied(false), 1500);
-                  } catch {}
+                  } catch { }
                 }}
               >
                 {copied ? "Link copied" : "Copy link"}
               </button>
-            <button className="text-sm underline" onClick={refreshStations}>Refresh</button>
+              <button className="text-sm underline" onClick={refreshStations}>Refresh</button>
             </div>
           </div>
           {stationsLoading ? (
@@ -411,7 +418,13 @@ export default function Home() {
             </ul>
           </div>
         </section>
-
+          <div className="mt-6 flex justify-center">
+          <AdSense
+            slot="9783500294"
+            className="max-w-728px w-full"
+            adType="banner"
+          />
+        </div>
         <section className="mt-12">
           <h2 className="text-xl sm:text-2xl font-semibold">Benefits, disadvantages and engine compatibility</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">

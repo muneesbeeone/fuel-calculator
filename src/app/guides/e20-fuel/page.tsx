@@ -1,3 +1,5 @@
+import AdSense from "@/components/AdSense";
+
 export const metadata = {
   title: "E20 Fuel Guide | Fuel Calculator India",
   description: "Understand E20 petrol in India: compatibility, advantages, and tips.",
@@ -26,6 +28,13 @@ export default function E20Guide() {
         <li>For mixed trips, calculate with both Petrol and E20 to compare net cost per km.</li>
         <li>Maintain recommended tyre pressure and smooth driving to offset any mileage drop.</li>
       </ul>
+      <div className="mt-6 flex justify-center">
+          <AdSense
+            slot="9783500294"
+            className="max-w-728px w-full"
+            adType="banner"
+          />
+        </div>
     </article>
   );
 }

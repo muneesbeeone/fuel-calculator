@@ -1,3 +1,5 @@
+import AdSense from "@/components/AdSense";
+
 export default function GuidesIndex() {
   const items = [
     { href: "/guides/e20-fuel", title: "E20 fuel: what you need to know", desc: "Compatibility, pros/cons, and mileage impact." },
@@ -15,6 +17,13 @@ export default function GuidesIndex() {
           </li>
         ))}
       </ul>
+      <div className="mt-6 flex justify-center">
+          <AdSense
+            slot="9783500294"
+            className="max-w-728px w-full"
+            adType="banner"
+          />
+        </div>
     </div>
   );
 }
