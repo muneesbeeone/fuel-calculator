@@ -315,7 +315,7 @@ export default function Home() {
           </motion.div>
         )}
 
-        <motion.div className="mt-8 rounded-xl border border-black/10 dark:border-white/15 p-4" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3, delay: 0.15 }}>
+        <motion.div className="mt-8 rounded-xl border border-black/10 dark:border-white/15 p-4 hidden" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3, delay: 0.15 }}>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-medium">Nearby Fuel Stations</h2>
             <div className="flex items-center gap-3">
