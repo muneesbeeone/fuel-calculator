@@ -22,6 +22,13 @@ export default function SaveFuelGuide() {
           <li key={i}>{t}</li>
         ))}
       </ul>
+      <div className="mt-6 flex justify-center">
+          <AdSense
+            slot="9783500294"
+            className="max-w-728px w-full"
+            adType="banner"
+          />
+        </div>
     </article>
   );
 }
