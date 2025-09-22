@@ -36,6 +36,31 @@ function haversineDistance(
   return R * c;
 }
 
+async function forwardGeocode(query: string): Promise<{ lat: number; lon: number; displayName: string } | null> {
+  try {
+    const params = new URLSearchParams({
+      q: query,
+      format: "jsonv2",
+      addressdetails: "1",
+      limit: "1",
+      // Prioritize India for better results
+      countrycodes: "in",
+    });
+    const url = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const firstResult = data[0];
+        return { lat: parseFloat(firstResult.lat), lon: parseFloat(firstResult.lon), displayName: firstResult.display_name };
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 function CountUp({ value, prefix = "", className = "" }: { value?: number; prefix?: string; className?: string }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
@@ -142,6 +167,57 @@ export default function Home() {
       }
     }
   }, [cityPrice, ui.coords, cities, ui.city]);
+
+  // Sync city input with detected/selected city
+  useEffect(() => {
+    if (ui.city && ui.city !== cityQuery) {
+      setCityQuery(ui.city);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ui.city]);
+
+  async function handleCitySearch() {
+    const query = cityQuery.trim();
+    if (!query || query.toLowerCase() === ui.city?.toLowerCase()) return;
+
+    // 1. Check for exact match in our list
+    const exactMatch = cities.find((c) => c.city.toLowerCase() === query.toLowerCase());
+    if (exactMatch) {
+      setUi((prev) => ({ ...prev, city: exactMatch.city, state: exactMatch.state, locationLabel: `${exactMatch.city}, ${exactMatch.state ?? ""}`.trim() }));
+      setCityQuery(exactMatch.city); // Update input to match
+      return;
+    }
+
+    // 2. If no exact match, forward geocode the query
+    setUi(prev => ({ ...prev, locationLabel: `Searching for "${query}"...` }));
+    const geocoded = await forwardGeocode(query);
+
+    if (geocoded) {
+      // 3. Find nearest city with price data from geocoded coordinates
+      let nearestCityData: (typeof cities[0]) | null = null;
+      let minDistance = Infinity;
+
+      for (const city of cities) {
+        const cityCoord = cityCoordinates[city.city];
+        if (cityCoord) {
+          const distance = haversineDistance({ latitude: geocoded.lat, longitude: geocoded.lon }, cityCoord);
+          if (distance < minDistance) {
+            minDistance = distance;
+            nearestCityData = city;
+          }
+        }
+      }
+
+      if (nearestCityData) {
+        setUi({ city: nearestCityData.city, state: nearestCityData.state, locationLabel: `Showing prices for ${nearestCityData.city}, nearest to ${query}`, coords: { latitude: geocoded.lat, longitude: geocoded.lon } });
+        setCityQuery(nearestCityData.city); // Update input to show the city being used
+      } else {
+        setUi(prev => ({ ...prev, locationLabel: `Could not find prices near "${query}"` }));
+      }
+    } else {
+      setUi(prev => ({ ...prev, locationLabel: `Could not find location: "${query}"` }));
+    }
+  }
 
   // Fetch nearby stations (reusable)
   async function refreshStations(radius: number = searchRadius) {
@@ -291,10 +367,11 @@ export default function Home() {
               className="w-full rounded-md border border-black/10 dark:border-white/15 bg-transparent px-3 py-2"
               value={cityQuery}
               onChange={(e) => setCityQuery(e.target.value)}
-              onBlur={() => {
-                const chosen = cities.find((c) => c.city.toLowerCase() === cityQuery.trim().toLowerCase());
-                if (chosen) {
-                  setUi((prev) => ({ ...prev, city: chosen.city, state: chosen.state, locationLabel: `${chosen.city}, ${chosen.state ?? ""}`.trim() }));
+              onBlur={handleCitySearch}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleCitySearch();
+                  (e.target as HTMLInputElement).blur();
                 }
               }}
             />
