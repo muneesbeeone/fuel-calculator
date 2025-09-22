@@ -6,6 +6,36 @@ import { reverseGeocode } from "@/lib/reverseGeocode";
 import { estimateTripCost, findCityPrice, listCities, type FuelType } from "@/lib/fuelPrices";
 import AdSense from "@/components/AdSense";
 
+// Ideally, coordinates would be part of the data from `listCities`.
+const cityCoordinates: { [key: string]: { lat: number; lon: number } } = {
+  "Ernakulam": { lat: 9.9816, lon: 76.2996 },
+  "Mumbai": { lat: 19.0760, lon: 72.8777 },
+  "Delhi": { lat: 28.7041, lon: 77.1025 },
+  "Bengaluru": { lat: 12.9716, lon: 77.5946 },
+  "Chennai": { lat: 13.0827, lon: 80.2707 },
+  "Kolkata": { lat: 22.5726, lon: 88.3639 },
+  "Hyderabad": { lat: 17.3850, lon: 78.4867 },
+  "Pune": { lat: 18.5204, lon: 73.8567 },
+  "Ahmedabad": { lat: 23.0225, lon: 72.5714 },
+  "Jaipur": { lat: 26.9124, lon: 75.7873 },
+  "Lucknow": { lat: 26.8467, lon: 80.9462 },
+  "Chandigarh": { lat: 30.7333, lon: 76.7794 },
+};
+
+function haversineDistance(
+  coords1: { latitude: number; longitude: number },
+  coords2: { lat: number; lon: number }
+): number {
+  const R = 6371; // Radius of the Earth in km
+  const dLat = (coords2.lat - coords1.latitude) * (Math.PI / 180);
+  const dLon = (coords2.lon - coords1.longitude) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(coords1.latitude * (Math.PI / 180)) * Math.cos(coords2.lat * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 function CountUp({ value, prefix = "", className = "" }: { value?: number; prefix?: string; className?: string }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
@@ -33,6 +63,7 @@ type UiState = {
   city?: string;
   state?: string;
   country?: string;
+  coords?: { latitude: number; longitude: number };
 };
 
 export default function Home() {
@@ -43,6 +74,7 @@ export default function Home() {
   const [roundTrip, setRoundTrip] = useState<boolean>(false);
   const [stations, setStations] = useState<Array<{ id: number; name: string; brand?: string; operator?: string; lat?: number; lon?: number }>>([]);
   const [stationsLoading, setStationsLoading] = useState(false);
+  const [searchRadius, setSearchRadius] = useState(3000);
   const [news, setNews] = useState<Array<{ title: string; link: string; pubDate?: string }>>([]);
 
   const cityPrice = useMemo(() => findCityPrice(ui.city, ui.state), [ui.city, ui.state]);
@@ -55,15 +87,25 @@ export default function Home() {
     async function init() {
       try {
         const coords = await getBrowserLocation();
-        const info = await reverseGeocode(coords);
         if (!isMounted) return;
-        setUi({
-          locationLabel: info.displayName || "Location detected",
-          city: info.city,
-          state: info.state,
-          country: info.country,
-        });
+        // We have coordinates, now try to get city name
+        try {
+          const info = await reverseGeocode(coords);
+          if (!isMounted) return;
+          setUi({
+            locationLabel: info.displayName || "Location detected",
+            city: info.city,
+            state: info.state,
+            country: info.country,
+            coords,
+          });
+        } catch {
+          // Reverse geocoding failed, but we have coords.
+          if (!isMounted) return;
+          setUi(prev => ({ ...prev, locationLabel: "Could not detect city, finding nearest.", coords }));
+        }
       } catch {
+        // Geolocation failed
         if (!isMounted) return;
         setUi({ locationLabel: "Could not detect location" });
       }
@@ -74,13 +116,40 @@ export default function Home() {
     };
   }, []);
 
+  // Find nearest city if current city has no price data
+  useEffect(() => {
+    // If we have a city price, we are good.
+    if (cityPrice) return;
+
+    // If no price info, but we have coordinates, find the nearest city.
+    if (ui.coords) {
+      let nearestCityData: (typeof cities[0]) | null = null;
+      let minDistance = Infinity;
+
+      for (const city of cities) {
+        const cityCoord = cityCoordinates[city.city];
+        if (cityCoord) {
+          const distance = haversineDistance(ui.coords, cityCoord);
+          if (distance < minDistance) {
+            minDistance = distance;
+            nearestCityData = city;
+          }
+        }
+      }
+
+      if (nearestCityData && nearestCityData.city !== ui.city) {
+        setUi(prev => ({ ...prev, city: nearestCityData!.city, state: nearestCityData!.state, locationLabel: `Showing prices for nearest city: ${nearestCityData!.city}` }));
+      }
+    }
+  }, [cityPrice, ui.coords, cities, ui.city]);
+
   // Fetch nearby stations (reusable)
-  async function refreshStations() {
+  async function refreshStations(radius: number = searchRadius) {
     try {
       setStationsLoading(true);
       const coords = await getBrowserLocation();
       // Query Overpass directly for nearby stations
-      const query = `node["amenity"="fuel"](around:3000,${coords.latitude},${coords.longitude});out tags center;`;
+      const query = `[out:json];node(around:${radius},${coords.latitude},${coords.longitude})["amenity"="fuel"];out tags center;`;
       const res = await fetch("https://overpass-api.de/api/interpreter", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
@@ -322,8 +391,8 @@ export default function Home() {
           </motion.div>
         )}
 
-        <motion.div className="mt-8 rounded-xl border border-black/10 dark:border-white/15 p-4 hidden" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3, delay: 0.15 }}>
-          <div className="flex items-center justify-between">
+        <motion.div className="mt-8 rounded-xl border border-black/10 dark:border-white/15 p-4" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3, delay: 0.15 }}>
+          <div className="flex flex-wrap items-center justify-between gap-y-2">
             <h2 className="text-lg font-medium">Nearby Fuel Stations</h2>
             <div className="flex items-center gap-3">
               <button
@@ -338,13 +407,29 @@ export default function Home() {
               >
                 {copied ? "Link copied" : "Copy link"}
               </button>
-              <button className="text-sm underline" onClick={refreshStations}>Refresh</button>
+              <button className="text-sm underline" onClick={() => refreshStations()}>Refresh</button>
             </div>
+          </div>
+          <div className="mt-3 flex items-center gap-2 text-sm">
+            <span className="opacity-80">Radius:</span>
+            {[3, 5, 10].map((km) => (
+              <button
+                key={km}
+                className={`rounded-md border px-2 py-1 ${searchRadius / 1000 === km ? "bg-foreground text-background" : "border-black/10 dark:border-white/15"}`}
+                onClick={() => {
+                  const newRadius = km * 1000;
+                  setSearchRadius(newRadius);
+                  refreshStations(newRadius);
+                }}
+              >
+                {km} km
+              </button>
+            ))}
           </div>
           {stationsLoading ? (
             <p className="mt-3 text-sm">Searching nearby stations…</p>
           ) : stations.length === 0 ? (
-            <p className="mt-3 text-sm">No stations found within 3 km. Try moving closer to the city center.</p>
+            <p className="mt-3 text-sm">No stations found within {searchRadius / 1000} km. Try increasing the search radius.</p>
           ) : (
             <motion.ul className="mt-3 space-y-2 text-sm" layout>
               <AnimatePresence>
